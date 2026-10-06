@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+html, body { height: 100%; background: #eef2f7; color: #24344a; }
+body { font-size: 14px; line-height: 1.45; }
+* { scrollbar-width: thin; scrollbar-color: #b7c4d6 #eef2f7; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #b7c4d6; border-radius: 4px; }
+
+.maplibregl-ctrl-group { background: #fff !important; border: 1px solid #d3dce8; }
+
+.maplibregl-ctrl-attrib { background: rgba(255,255,255,0.8) !important; color: #5d6f87 !important; }
+.maplibregl-ctrl-attrib a { color: #5d6f87 !important; }
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-panel px-3 py-1.5 text-[13px] font-medium text-text shadow-sm transition hover:border-accent hover:text-strong disabled:cursor-not-allowed disabled:opacity-40; }
+  .btn-primary { @apply border-accent bg-accent text-white hover:bg-accent/90 hover:text-white; }
+  .btn-danger { @apply border-p1/60 bg-panel text-p1 hover:bg-p1/10; }
+  .btn-sm { @apply px-2.5 py-1 text-xs; }
+  .input { @apply w-full rounded-md border border-line bg-panel px-2.5 py-1.5 text-sm text-text outline-none focus:border-accent focus:ring-1 focus:ring-accent/30; }
+  .label { @apply mb-1 block text-xs font-medium text-muted; }
+  .panel { @apply rounded-lg border border-line bg-panel shadow-sm; }
+  .th { @apply px-2.5 py-2 text-left text-xs font-medium text-muted; }
+  .td { @apply px-2.5 py-2 text-[13px]; }
+}
+
+.pulse-dot { animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+.present .no-present { display: none !important; }
+
+.maplibregl-ctrl-bottom-left { margin-bottom: 4.6rem; }
