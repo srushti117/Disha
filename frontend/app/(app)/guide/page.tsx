@@ -26,7 +26,7 @@ const GLOSSARY = [
 
 export default function Guide() {
   return (
-    <div className="mx-auto max-w-4xl space-y-4 p-4">
+    <div className="mx-auto max-w-4xl space-y-6 px-6 py-8">
       <PageHeader title="How DISHA works" sub="A two-minute explanation" />
 
       <Panel title="What is DISHA?">

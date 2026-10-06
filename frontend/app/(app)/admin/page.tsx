@@ -15,9 +15,9 @@ export default function Admin() {
   const { data: audit } = useApi<any[]>(isAdmin ? "/api/admin/audit?limit=300" : null, { poll: 10000 });
   const { data: models } = useApi<any[]>("/api/models");
   const { data: sources } = useApi<any[]>(isAdmin ? "/api/admin/data-sources" : null);
-  if (!isAdmin) return <div className="p-4"><Empty>Administrator access required.</Empty></div>;
+  if (!isAdmin) return <div className="mx-auto max-w-6xl px-6 py-8"><Empty>Administrator access required.</Empty></div>;
   return (
-    <div className="p-4">
+    <div className="mx-auto max-w-6xl px-6 py-8">
       <PageHeader title="Administration" sub="Users, audit trail, model registry and data sources" />
       <Panel pad={false}>
         <Tabs<Tab> value={tab} onChange={setTab} tabs={[{ key: "users", label: "Users" }, { key: "audit", label: "Audit log" }, { key: "models", label: "Models" }, { key: "sources", label: "Data sources" }]} />

@@ -78,7 +78,7 @@ export default function Present() {
       <main className="relative min-h-0">
         {version > 0 || step === 0 ? <MapView eventId={Number(id)} data={map} layers={layers} routes={routes} origin={origin} selected={sel} onSelect={setSel} /> : <div className="grid h-full place-items-center text-muted">Press 2 to run the analysis.</div>}
         {k && version > 0 && (
-          <div className="absolute left-4 top-4 flex gap-4 rounded border border-line bg-panel/95 px-4 py-2">
+          <div className="absolute left-4 top-4 flex gap-6 rounded border border-line bg-panel/95 px-4 py-2">
             {(["P1", "P2", "P3", "P4"] as const).map((l) => <div key={l} className="text-center"><div className="tabular-nums text-3xl font-bold" style={{ color: LEVEL_COLOR[l] }}>{map?.counts?.[l] ?? k.levels[l]}</div><div className="text-[11px] font-bold text-muted">{l}</div></div>)}
             {t > 0 && <span className="self-center rounded bg-accent/20 px-2 py-1 text-xs font-bold text-accent">ESTIMATE +{t}h</span>}
           </div>

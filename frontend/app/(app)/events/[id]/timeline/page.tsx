@@ -16,7 +16,7 @@ export default function Timeline() {
   const { data, loading } = useApi<any[]>(`/api/events/${id}/timeline`, { deps: [version], poll: 6000 });
   const { data: audit } = useApi<any[]>(can("event.write") ? `/api/admin/audit?event_id=${id}&limit=100` : null, { deps: [version] });
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-6 lg:grid-cols-2">
       <div>
         <PageHeader title="Incident timeline" sub="Operational record of detection, decisions and field feedback" />
         {loading && !data ? <Spinner /> : (

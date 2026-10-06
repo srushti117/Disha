@@ -10,16 +10,16 @@ export default function Dashboard() {
   if (loading && !data) return <Spinner />;
   const rows = (data?.events || []).filter((r: any) => r.kpis);
   return (
-    <div className="p-4">
+    <div className="mx-auto max-w-6xl px-6 py-8">
       <PageHeader title="Dashboard" sub="All active events at a glance" />
       {!data?.events.length ? <Empty>No events yet. <Link href="/events" className="text-accent underline">Create one</Link>.</Empty> : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {rows.length > 0 && (
             <Panel title="P-level distribution by event">
               <div className="h-56"><LevelBars labels={rows.map((r: any) => r.event.code)} series={["P1", "P2", "P3", "P4"].map((l) => ({ level: l, values: rows.map((r: any) => r.kpis.levels[l]) }))} /></div>
             </Panel>
           )}
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {data.events.map((r: any) => {
               const e = r.event, k = r.kpis;
               return (

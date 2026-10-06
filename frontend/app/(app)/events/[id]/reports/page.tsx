@@ -5,7 +5,7 @@ import { download } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 import { useAuth } from "@/lib/auth";
 import { useEvent } from "@/components/EventContext";
-import { Empty, ErrorBox, PageHeader, Panel, Provenance } from "@/components/ui";
+import { Disclosure, Empty, ErrorBox, PageHeader, Panel } from "@/components/ui";
 import { FreshnessList } from "@/components/Insights";
 
 const EXPORTS = [
@@ -31,13 +31,13 @@ export default function Reports() {
     } catch (e: any) { setErr(e.message); } finally { setBusy(null); }
   }
   return (
-    <div className="space-y-4">
-      <PageHeader title="Reports & exports" sub="Every export carries event, timestamp, data sources, model version and confidence metadata" />
+    <div className="space-y-6">
+      <PageHeader title="Reports & exports" sub="Download a situation report or the data behind it" />
       <ErrorBox error={err} />
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         <Panel title="Situation report (PDF)" className="lg:col-span-1">
-          <p className="mb-3 text-xs text-muted">Executive summary, affected area, population at risk, P1/P2 locations, critical infrastructure, road disruptions, predicted risk, resource allocation, recommended actions, map, and confidence & data sources.</p>
-          <button className="btn btn-primary w-full" disabled={!can("report.generate") || busy === "pdf"} onClick={() => get("pdf")}>{busy === "pdf" ? "Generating…" : "Generate situation report"}</button>
+          <p className="mb-3 text-xs text-muted">A readable summary with the map, priority areas, affected facilities, planned resources and the data sources used.</p>
+          <button className="btn btn-primary w-full" disabled={!can("report.generate") || busy === "pdf"} onClick={() => get("pdf")}>{busy === "pdf" ? "Generating…" : "Download situation report (PDF)"}</button>
           {!can("report.generate") && <p className="mt-1 text-[11px] text-muted">Your role cannot generate reports.</p>}
         </Panel>
         <Panel title="Data exports" className="lg:col-span-2">
@@ -50,11 +50,10 @@ export default function Reports() {
           </div>
         </Panel>
       </div>
-      <Panel title="Executive summary (preview)">
-        <p className="text-sm leading-relaxed">{sum?.text}</p>
-        <Provenance items={["H3 cell digital twin", `assessment v${version}`, "DEMO / SIMULATED inputs"]} />
-      </Panel>
-      {health && <Panel title="Confidence & data freshness"><FreshnessList items={health.freshness} /></Panel>}
+      <Disclosure title="Summary text and data freshness">
+        <p className="text-[15px] leading-relaxed">{sum?.text}</p>
+        {health && <div className="mt-5"><div className="mb-1.5 text-sm font-medium text-strong">Data freshness</div><FreshnessList items={health.freshness} /></div>}
+      </Disclosure>
     </div>
   );
 }

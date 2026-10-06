@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { LEVEL_COLOR, pct } from "@/lib/format";
 import { useEvent } from "@/components/EventContext";
 import CellPanel from "@/components/CellPanel";
-import { ConfBadge, Empty, ErrorBox, LevelBadge, PageHeader, Panel, Spinner } from "@/components/ui";
+import { ConfBadge, Disclosure, Empty, ErrorBox, LevelBadge, PageHeader, Spinner } from "@/components/ui";
 
 const KEYS = ["severity", "exposure", "infrastructure", "accessibility"] as const;
 const LABEL = { severity: "Severity (S)", exposure: "Exposure (E)", infrastructure: "Critical infra (C)", accessibility: "Access loss (A)" };
@@ -18,7 +18,7 @@ function Inner() {
   const { can } = useAuth();
   const { event } = useEvent();
   const version = event?.assessment_version ?? 0;
-  const [levels, setLevels] = useState<string[]>(["P1", "P2", "P3"]);
+  const [levels, setLevels] = useState<string[]>(["P1", "P2"]);
   const [q, setQ] = useState("");
   const [sel, setSel] = useState<string | null>(null);
   const { data, loading, reload } = useApi<any>(`/api/events/${id}/priorities?level=${levels.join(",")}${q ? `&q=${encodeURIComponent(q)}` : ""}&limit=300`, { deps: [version] });
@@ -46,32 +46,29 @@ function Inner() {
   const sum = w ? Object.values(w).reduce((a, b) => a + b, 0) : 1;
   return (
     <div>
-      <PageHeader title="Priorities" sub="Impact Priority Index: PI = wS·S + wE·E + wC·C + wA·A, all inputs normalised 0-1" />
-      <div className="grid gap-4 xl:grid-cols-[1fr_22rem]">
-        <div className="space-y-4">
+      <PageHeader title="Priorities" sub="How urgent each area is. Select a row to see the reasons." />
+      <div className="grid gap-6 xl:grid-cols-[1fr_22rem]">
+        <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-2">
             {["P1", "P2", "P3", "P4"].map((l) => {
               const on = levels.includes(l);
-              return <button key={l} onClick={() => setLevels(on ? levels.filter((x) => x !== l) : [...levels, l])} className="rounded border px-2.5 py-1 text-xs font-bold" style={{ borderColor: LEVEL_COLOR[l], background: on ? `${LEVEL_COLOR[l]}33` : "transparent", color: LEVEL_COLOR[l] }}>{l} <span className="tabular-nums">{data?.counts[l] ?? ""}</span></button>;
+              return <button key={l} onClick={() => setLevels(on ? levels.filter((x) => x !== l) : [...levels, l])} className="rounded-full border px-3 py-1 text-sm font-medium" style={{ borderColor: LEVEL_COLOR[l], background: on ? `${LEVEL_COLOR[l]}33` : "transparent", color: LEVEL_COLOR[l] }}>{l} <span className="tabular-nums">{data?.counts[l] ?? ""}</span></button>;
             })}
             <input className="input ml-auto max-w-xs" placeholder="Search cell no. or reason…" value={q} onChange={(e) => setQ(e.target.value)} />
           </div>
           {loading && !data ? <Spinner /> : (
             <div className="panel overflow-x-auto">
               <table className="w-full">
-                <thead><tr className="border-b border-line"><th className="th">Cell</th><th className="th">Level</th><th className="th">PI</th><th className="th">S / E / C / A</th><th className="th">Confidence</th><th className="th">Exposed</th><th className="th">Road</th><th className="th">Field</th><th className="th">Top reasons</th></tr></thead>
+                <thead><tr className="border-b border-line"><th className="th">Area</th><th className="th">Priority</th><th className="th">Score</th><th className="th">People exposed</th><th className="th">Main reason</th><th className="th">Confidence</th></tr></thead>
                 <tbody>
                   {data?.cells.map((c: any) => (
                     <tr key={c.h3_index} onClick={() => setSel(c.h3_index)} className={`cursor-pointer border-b border-line/60 hover:bg-panel2 ${sel === c.h3_index ? "bg-panel2" : ""}`}>
-                      <td className="td tabular-nums font-bold text-strong">{String(c.cell_no).padStart(2, "0")}</td>
+                      <td className="td font-medium text-strong">Cell {String(c.cell_no).padStart(2, "0")}</td>
                       <td className="td"><LevelBadge level={c.level} small /></td>
                       <td className="td tabular-nums">{c.score.toFixed(2)}</td>
-                      <td className="td tabular-nums text-xs text-muted">{KEYS.map((k) => Math.round((c.components[k] || 0) * 100)).join(" / ")}</td>
-                      <td className="td"><ConfBadge value={c.confidence} label={c.confidence_label.replace(" CONFIDENCE", "")} /></td>
                       <td className="td tabular-nums">{c.population_exposed.toLocaleString()}</td>
-                      <td className="td text-muted">{c.road_status.replace("_", " ")}</td>
-                      <td className="td text-xs text-muted">{c.field_status}</td>
-                      <td className="td text-xs text-muted">{c.reason_codes.slice(0, 2).join(" · ")}</td>
+                      <td className="td text-muted">{c.reason_codes[0]}</td>
+                      <td className="td"><ConfBadge label={c.confidence_label.replace(" CONFIDENCE", "").toLowerCase()} /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -80,7 +77,7 @@ function Inner() {
             </div>
           )}
           {can("priority.configure") && w && th && (
-            <Panel title="Priority engine configuration" right={<span className="text-[11px] text-muted">changes recalculate the whole event and are audit-logged</span>}>
+            <Disclosure title="Adjust how priority is calculated" hint="changes recalculate everything">
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="space-y-2">
                   <div className="label">Weights (normalised to {sum.toFixed(2)} → 1.00)</div>
@@ -98,8 +95,8 @@ function Inner() {
                 </div>
               </div>
               <ErrorBox error={err} />
-              <div className="mt-3 flex gap-2"><button className="btn btn-primary" disabled={saving} onClick={() => save(false)}>{saving ? "Recalculating…" : "Apply & recalculate"}</button><button className="btn" disabled={saving} onClick={() => save(true)}>Reset to DISHA defaults</button></div>
-            </Panel>
+              <div className="mt-3 flex gap-2"><button className="btn btn-primary" disabled={saving} onClick={() => save(false)}>{saving ? "Recalculating…" : "Apply & recalculate"}</button><button className="btn" disabled={saving} onClick={() => save(true)}>Reset to defaults</button></div>
+            </Disclosure>
           )}
         </div>
         <div className="xl:sticky xl:top-2 xl:self-start">

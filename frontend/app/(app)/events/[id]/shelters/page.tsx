@@ -16,7 +16,7 @@ export default function Shelters() {
   if (!data) return <Spinner />;
   const s = data.summary;
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader title="Evacuation planner" sub="People in P1/P2 cells are assigned to safe, road-reachable shelters with remaining capacity" />
       <div className="panel grid grid-cols-3 gap-3 p-3">
         <Stat label="Need shelter" value={num(s.people_needing_shelter)} /><Stat label="Placed" value={num(s.people_assigned)} color="#35c28a" />
@@ -27,7 +27,7 @@ export default function Shelters() {
           <ul className="space-y-1">{data.flags.map((f: any, i: number) => <li key={i} className="flex gap-2 text-xs"><span className="shrink-0 rounded bg-p2/20 px-1.5 py-0.5 text-[11px] font-bold text-p2">{FLAG[f.type] || f.type}</span><span className="text-muted">{f.detail}</span></li>)}</ul>
         </Panel>
       )}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <Panel title="Assignments" pad={false}>
           <table className="w-full"><thead><tr className="border-b border-line"><th className="th">Cell</th><th className="th">→ Shelter</th><th className="th">People</th><th className="th">Road dist.</th><th className="th">Capacity left</th></tr></thead>
             <tbody>{data.assignments.map((a: any, i: number) => (

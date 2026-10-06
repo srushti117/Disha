@@ -6,7 +6,7 @@ import { useApi } from "@/lib/hooks";
 import { pct } from "@/lib/format";
 import { useEvent } from "@/components/EventContext";
 import { LevelBars } from "@/components/Charts";
-import { ConfBadge, Empty, EstimateBadge, LevelBadge, PageHeader, Panel, Spinner } from "@/components/ui";
+import { ConfBadge, Disclosure, Empty, EstimateBadge, LevelBadge, PageHeader, Panel, Spinner } from "@/components/ui";
 
 export default function Predictions() {
   const { id } = useParams<{ id: string }>();
@@ -20,9 +20,9 @@ export default function Predictions() {
   const sel = data.horizons.find((x: any) => x.horizon_h === h) || data.horizons[0];
   const labels = ["Current", ...data.horizons.map((x: any) => `+${x.horizon_h} h`)];
   return (
-    <div className="space-y-4">
-      <PageHeader title={<span className="flex items-center gap-2">Risk prediction <EstimateBadge /></span>} sub={data.label} />
-      <div className="grid gap-4 lg:grid-cols-3">
+    <div className="space-y-6">
+      <PageHeader title={<span className="flex items-center gap-2">Risk prediction <EstimateBadge /></span>} sub="Where conditions may get worse. These are rough estimates, not forecasts you can rely on." />
+      <div className="grid gap-6 lg:grid-cols-3">
         <Panel title="Current vs predicted">
           <div className="grid grid-cols-2 gap-3">
             <div><div className="label">Current</div><div className="tabular-nums text-3xl font-bold text-p1">P1: {cur.P1}</div></div>
@@ -35,7 +35,7 @@ export default function Predictions() {
           <div className="h-52"><LevelBars labels={labels} series={["P1", "P2", "P3", "P4"].map((l) => ({ level: l, values: [cur[l], ...data.horizons.map((x: any) => x.counts[l])] }))} /></div>
         </Panel>
       </div>
-      <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
+      <div className="space-y-6">
         <Panel title={`Locations likely to escalate within ${sel.horizon_h} h`} pad={false} right={<Link href={`/events/${id}/map`} className="text-[11px] text-accent">open time machine →</Link>}>
           <table className="w-full"><thead><tr className="border-b border-line"><th className="th">Cell</th><th className="th">Now</th><th className="th">Predicted</th><th className="th">Probability</th><th className="th">Confidence</th><th className="th">Drivers</th></tr></thead>
             <tbody>
@@ -48,7 +48,7 @@ export default function Predictions() {
             </tbody></table>
           {!sel.escalations.length && <div className="p-4 text-xs text-muted">No escalations estimated at this horizon.</div>}
         </Panel>
-        <Panel title="Model & inputs">
+        <Disclosure title="How these estimates are made">
           <dl className="space-y-1.5 text-xs">
             <div className="flex justify-between"><dt className="text-muted">Model</dt><dd className="tabular-nums">{data.model?.name} v{data.model?.version}</dd></div>
             <div className="flex justify-between"><dt className="text-muted">Rainfall (mm)</dt><dd className="tabular-nums">{Object.entries(data.weather?.rainfall_mm || {}).map(([k, v]) => `${k}h:${v}`).join(" ")}</dd></div>
@@ -57,7 +57,7 @@ export default function Predictions() {
           </dl>
           <p className="mt-2 text-[11px] text-warn">{data.weather?.source}. {data.weather?.note}</p>
           <p className="mt-2 text-[11px] text-muted">Hand-set logistic coefficients over neighbour hazard state, terrain, rainfall and river trend. Not trained or validated on observed progression; confidence decays with horizon.</p>
-        </Panel>
+        </Disclosure>
       </div>
     </div>
   );

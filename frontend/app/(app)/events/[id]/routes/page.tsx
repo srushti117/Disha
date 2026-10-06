@@ -40,10 +40,10 @@ export default function RoutesPage() {
   if (!version) return <Empty>Run analysis to plan rescue routes.</Empty>;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader title="Rescue route optimiser" sub="Shortest, fastest and safest routes over the hazard-aware road graph" />
-      <div className="grid gap-4 xl:grid-cols-[22rem_1fr]">
-        <div className="space-y-4">
+      <div className="grid gap-6 xl:grid-cols-[22rem_1fr]">
+        <div className="space-y-6">
           <Panel title="Plan route">
             <label className="label" htmlFor="tgt">Target cell</label>
             <select id="tgt" className="input" value={target} onChange={(e) => setTarget(e.target.value)}>

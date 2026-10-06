@@ -26,7 +26,7 @@ export default function Settings() {
     try { await api(`/api/events/${id}/alerts/config`, { method: "PUT", body: cfg }); setSaved(true); reload(); } catch (e: any) { setErr(e.message); }
   }
   return (
-    <div className="mx-auto max-w-5xl space-y-4 p-4">
+    <div className="mx-auto max-w-5xl space-y-6 px-6 py-8">
       <PageHeader title="Settings" sub="Alerts, roles and platform information" />
       <Panel title="Alert engine" right={events && <select className="input w-64" value={id ?? ""} onChange={(e) => setId(+e.target.value)}>{events.map((e) => <option key={e.id} value={e.id}>{e.code} · {e.name}</option>)}</select>}>
         {!cfg ? <Spinner /> : (
@@ -43,7 +43,7 @@ export default function Settings() {
           </>
         )}
       </Panel>
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <Panel title="Your access"><div className="text-xs">Signed in as <b className="text-strong">{user?.email}</b> · role <b className=" text-accent">{user?.role}</b></div>
           <div className="mt-2 flex flex-wrap gap-1">{user?.permissions?.map((p) => <span key={p} className="rounded border border-line px-1.5 py-0.5 tabular-nums text-[11px] text-muted">{p}</span>)}</div></Panel>
         <Panel title="Platform"><dl className="space-y-1 text-xs"><div className="flex justify-between"><dt className="text-muted">API</dt><dd className="tabular-nums">{API}</dd></div><div className="flex justify-between"><dt className="text-muted">Status</dt><dd>{health?.status}</dd></div><div className="flex justify-between"><dt className="text-muted">Database</dt><dd className="tabular-nums">{health?.database}</dd></div><div className="flex justify-between"><dt className="text-muted">Demo mode</dt><dd>{String(health?.demo_mode)}</dd></div><div className="flex justify-between"><dt className="text-muted">Notifications</dt><dd className="tabular-nums">{health?.notify_provider}</dd></div></dl></Panel>

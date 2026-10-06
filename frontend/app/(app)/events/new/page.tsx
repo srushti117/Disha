@@ -58,9 +58,9 @@ export default function NewEvent() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl p-4">
+    <div className="mx-auto max-w-3xl px-6 py-8">
       <PageHeader title="New event" sub="Define the hazard and the area of interest (AOI)" />
-      <form onSubmit={submit} className="space-y-4">
+      <form onSubmit={submit} className="space-y-6">
         <Panel title="Event">
           <div className="grid gap-3 md:grid-cols-3">
             <div className="md:col-span-2"><label className="label" htmlFor="n">Name</label><input id="n" className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Optional - defaults to the scenario name" /></div>

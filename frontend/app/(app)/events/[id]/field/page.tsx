@@ -64,7 +64,7 @@ function Inner() {
     <div className="mx-auto max-w-5xl">
       <PageHeader title="Field mode" sub={`Signed in as ${user?.name} (${user?.role})`} />
       <ErrorBox error={err} />
-      <div className="grid gap-4 md:grid-cols-[18rem_1fr]">
+      <div className="grid gap-6 md:grid-cols-[18rem_1fr]">
         <div className="space-y-2">
           <div className="label">Missions ({missions.length})</div>
           {missions.length === 0 && <Empty>No missions.</Empty>}
@@ -77,7 +77,7 @@ function Inner() {
         </div>
 
         {mission ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <Panel>
               <div className="tabular-nums text-2xl font-bold  text-strong">{mission.label}</div>
               <dl className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">

@@ -29,7 +29,7 @@ export default function Events() {
   }
 
   return (
-    <div className="p-4">
+    <div className="mx-auto max-w-6xl px-6 py-8">
       <PageHeader title="Events" sub="Monitor, compare and archive disaster events"
         right={<>
           <label className="flex items-center gap-1.5 text-xs text-muted"><input type="checkbox" checked={archived} onChange={(e) => setArchived(e.target.checked)} /> Show archived</label>
