@@ -22,20 +22,20 @@ await page.getByText("Kerala floods 2018 - Kuttanad (real data)").first().click(
 await page.waitForURL(/\/events\/\d+$/, { timeout: 30000 });
 const id = page.url().match(/events\/(\d+)/)[1];
 console.log("event", id);
-await page.getByRole("button", { name: "Analyse event" }).first().click();
+await page.getByRole("button", { name: "Run analysis" }).first().click();
 const t0 = Date.now();
 await page.getByText("Real data").first().waitFor();
 // wait for analysis to finish: the Re-analyse button appears
-await page.getByRole("button", { name: "Re-analyse" }).waitFor({ timeout: 600000 });
+await page.getByRole("button", { name: "Re-run analysis" }).waitFor({ timeout: 600000 });
 console.log("analysis seconds", ((Date.now() - t0) / 1000).toFixed(0));
 await page.waitForTimeout(1500);
 await page.screenshot({ path: "screenshots/R1-overview.png", fullPage: false });
 await page.goto(`${BASE}/events/${id}/map`);
 await page.waitForSelector("canvas");
-await page.getByText("Sentinel-2 true colour").first().click();   // real satellite layer on
+await page.getByText("Satellite image").first().click();   // real satellite layer on
 await page.waitForTimeout(6000);
 await page.screenshot({ path: "screenshots/R2-map-optical.png" });
-await page.getByText("Sentinel-2 true colour").first().click();   // off, show detection over OSM
+await page.getByText("Satellite image").first().click();   // off, show detection over OSM
 await page.waitForTimeout(5000);
 const box = await page.locator('[data-testid="map"]').boundingBox();
 for (const [fx, fy] of [[0.5, 0.5], [0.45, 0.5], [0.55, 0.5], [0.5, 0.4], [0.5, 0.6], [0.4, 0.45], [0.6, 0.55]]) {
