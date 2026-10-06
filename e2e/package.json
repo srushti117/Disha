@@ -1,0 +1,1 @@
+{ "name": "disha-e2e", "private": true, "version": "1.0.0", "scripts": { "test": "node run.mjs" }, "devDependencies": { "playwright-core": "^1.48.0" } }
