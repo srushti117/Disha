@@ -5,7 +5,7 @@
 |---|---|
 | Local, SQLite (`start-dev.ps1`) | **Verified** (tests + browser E2E) |
 | Backend on PostgreSQL 16 + PostGIS 3.4 | **Verified** - 45/45 tests pass against a real PostGIS container |
-| `docker compose build/up` | **Files provided but NOT verified in this environment.** The Docker VM lost outbound network during `pip install` (connection failures), so images were not built. The Dockerfiles use a version-constraints file (`backend/constraints.txt`, frozen from the tested environment) and long pip timeouts. Build on a machine with normal network and report issues. |
+| Docker images (backend + frontend) | **Verified in CI** - both images build on a clean GitHub Actions runner on every push. `docker compose up` (running the full stack) has **not** been exercised yet. |
 | Cloud / Kubernetes | Not attempted; nothing is provider-specific |
 
 ## Docker (single host)

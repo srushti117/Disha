@@ -74,6 +74,7 @@ Sign in as commander → **Command Centre → ▶ Run DISHA demo → Start demo*
 ## Verification performed
 * `pytest` - **52 tests pass on SQLite** (+1 opt-in real-services test, also passed); the earlier 45 also passed on **PostgreSQL 16 + PostGIS 3.4** (not re-run after the real-data work).
 * `next build` - type-checked production build.
+* **GitHub Actions CI** (on every push/PR): backend tests on SQLite and on a PostGIS service container, frontend type-check + build, the headless-browser end-to-end test (system Chrome), and Docker image builds. `docker compose up` itself has not been run.
 * Browser E2E (`e2e/`, headless Edge): login → full demo loop → map render → cell click → route → time machine → all 17 pages → Copilot → RBAC; **0 console errors**.
 
 Run them: `cd backend && .venv/Scripts/python -m pytest tests -q` · `cd e2e && npm i && node run.mjs` (stack running).
