@@ -1,5 +1,5 @@
 "use client";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { LEVEL_COLOR, LEVEL_NAME, confColor, pct } from "@/lib/format";
 
 export function LevelBadge({ level, small }: { level: string; small?: boolean }) {
@@ -121,12 +121,41 @@ export function Provenance({ items }: { items: string[] }) {
 
 export function PageHeader({ title, sub, right }: { title: ReactNode; sub?: ReactNode; right?: ReactNode }) {
   return (
-    <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 className="text-lg font-bold  text-strong">{title}</h1>
-        {sub && <div className="text-xs text-muted">{sub}</div>}
+        <h1 className="text-2xl font-semibold text-strong">{title}</h1>
+        {sub && <div className="mt-1 text-sm text-muted">{sub}</div>}
       </div>
       <div className="flex flex-wrap items-center gap-2">{right}</div>
+    </div>
+  );
+}
+
+/** Collapsible section: keeps secondary detail one click away instead of on screen. */
+export function Disclosure({ title, hint, children, defaultOpen = false }: { title: ReactNode; hint?: ReactNode; children: ReactNode; defaultOpen?: boolean }) {
+  return (
+    <details open={defaultOpen} className="panel group">
+      <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-semibold text-strong marker:hidden [&::-webkit-details-marker]:hidden">
+        <span>{title}</span>
+        <span className="flex items-center gap-3 text-xs font-normal text-muted">{hint}<span className="transition group-open:rotate-180">▾</span></span>
+      </summary>
+      <div className="border-t border-line p-4">{children}</div>
+    </details>
+  );
+}
+
+/** Small dropdown menu (click outside to close). */
+export function Menu({ label, children, align = "right" }: { label: ReactNode; children: (close: () => void) => ReactNode; align?: "left" | "right" }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button className="btn btn-sm" onClick={() => setOpen((o) => !o)} aria-haspopup="menu" aria-expanded={open}>{label} <span className="text-[10px]">▾</span></button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
+          <div role="menu" className={`absolute z-40 mt-1 min-w-48 rounded-md border border-line bg-panel py-1 shadow-lg ${align === "right" ? "right-0" : "left-0"}`}>{children(() => setOpen(false))}</div>
+        </>
+      )}
     </div>
   );
 }
