@@ -5,74 +5,83 @@ import { useApi } from "@/lib/hooks";
 import { dt } from "@/lib/format";
 import { useEvent } from "@/components/EventContext";
 import Pipeline from "@/components/Pipeline";
-import { AlertFeed, FreshnessList, KpiStrip, RecommendedActions, SummaryPanel, WhatChanged } from "@/components/Insights";
-import { ConfBadge, Empty, LevelBadge, Panel, Spinner } from "@/components/ui";
+import { AlertList, FreshnessList, KpiStrip, RecommendedActions, SummaryText, TopAreas, WhatChanged } from "@/components/Insights";
+import { Disclosure, Panel, Spinner } from "@/components/ui";
 
 export default function Overview() {
   const { id } = useParams<{ id: string }>();
   const { event: ev, status, analyse, busy } = useEvent();
   const version = ev?.assessment_version ?? 0;
   const { data: k } = useApi<any>(`/api/events/${id}/kpis`, { deps: [version] });
-  const { data: p1 } = useApi<any>(`/api/events/${id}/priorities?level=P1&limit=8`, { deps: [version] });
   const { data: health } = useApi<any>(`/api/events/${id}/data-health`, { deps: [version] });
+  const { data: alerts } = useApi<any>(version ? `/api/events/${id}/alerts` : null, { deps: [version] });
   if (!ev || !status) return <Spinner />;
+  const running = !!status.job && ["queued", "running"].includes(status.job.status);
+  const nAlerts = alerts?.alerts?.length ?? 0;
+
+  if (!version) {
+    return (
+      <div className="space-y-6">
+        <Panel>
+          <div className="flex flex-wrap items-center justify-between gap-6">
+            <div>
+              <div className="text-lg font-semibold text-strong">This event has not been analysed yet</div>
+              <div className="mt-1 text-sm text-muted">Run the analysis to detect the affected area and rank where to respond first.</div>
+            </div>
+            <button className="btn btn-primary" disabled={busy} onClick={() => analyse(true)}>{busy ? "Running…" : "Run analysis"}</button>
+          </div>
+        </Panel>
+        {(running || status.job) && <Panel title="Progress"><Pipeline steps={status.steps} />{status.job?.error && <div className="mt-3 rounded border border-p1/50 bg-p1/10 p-3 text-sm text-p1">{status.job.error}</div>}</Panel>}
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      {!version && (
-        <div className="panel flex flex-wrap items-center justify-between gap-3 border-accent/50 p-4">
-          <div><div className="text-sm font-bold text-strong">This event has not been analysed yet.</div><div className="text-xs text-muted">Run the pipeline to detect change, assess impact and generate priorities.</div></div>
-          <button className="btn btn-primary" disabled={busy} onClick={() => analyse(true)}>{busy ? "Running…" : "Analyse event"}</button>
-        </div>
-      )}
-      {k && version > 0 && <KpiStrip k={k} />}
-      <div className="grid gap-4 xl:grid-cols-3">
-        <div className="space-y-4 xl:col-span-2">
-          {version > 0 && <SummaryPanel eventId={ev.id} version={version} />}
-          {version > 0 && <RecommendedActions eventId={ev.id} version={version} />}
-          {version > 0 && p1 && (
-            <Panel title={`Top P1 locations (${p1.counts.P1})`} right={<Link className="text-[11px] text-accent" href={`/events/${id}/priorities`}>all priorities →</Link>} pad={false}>
-              <table className="w-full"><tbody>
-                {p1.cells.map((c: any) => (
-                  <tr key={c.h3_index} className="border-b border-line/60 hover:bg-panel2">
-                    <td className="td tabular-nums font-bold text-strong">CELL {String(c.cell_no).padStart(2, "0")}</td>
-                    <td className="td"><LevelBadge level={c.level} small /> <span className="tabular-nums">{c.score.toFixed(2)}</span></td>
-                    <td className="td"><ConfBadge value={c.confidence} label={c.confidence_label} /></td>
-                    <td className="td text-muted">{c.reason_codes.slice(0, 3).join(" · ")}</td>
-                  </tr>
-                ))}
-              </tbody></table>
-            </Panel>
-          )}
-          {version > 0 && <WhatChanged eventId={ev.id} version={version} />}
-        </div>
-        <div className="space-y-4">
-          <Panel title="Processing pipeline" right={<span className="text-[11px] text-muted">{status.job ? status.job.status : "not run"}</span>}>
-            <Pipeline steps={status.steps} />
-            {status.job?.error && <div className="mt-2 rounded border border-p1/50 bg-p1/10 p-2 text-xs text-p1">{status.job.error}</div>}
-          </Panel>
-          {version > 0 && <AlertFeed eventId={ev.id} version={version} />}
-          <Panel title="Event details">
-            <dl className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
-              <dt className="text-muted">Hazard</dt><dd className="text-right capitalize">{ev.hazard}</dd>
-              <dt className="text-muted">Severity</dt><dd className="text-right ">{ev.severity}</dd>
-              <dt className="text-muted">Start</dt><dd className="text-right">{dt(ev.start_date)}</dd>
-              <dt className="text-muted">AOI</dt><dd className="text-right">{ev.aoi?.area_km2} km² ({ev.aoi?.method === "demo" ? "scenario" : ev.aoi?.method})</dd>
-              <dt className="text-muted">H3 resolution</dt><dd className="text-right">{ev.h3_resolution}</dd>
-              <dt className="text-muted">Last satellite pass</dt><dd className="text-right">{dt(ev.last_satellite_pass)}</dd>
-              <dt className="text-muted">Last analysis</dt><dd className="text-right">{dt(ev.last_analysis)}</dd>
-            </dl>
-          </Panel>
-          {health?.sensor_mode && (
-            <Panel title="Sensor decision">
-              <div className="mb-1 tabular-nums text-sm font-bold text-accent">{health.sensor_mode}</div>
-              <p className="text-xs leading-snug text-muted">{health.sensor_explanation}</p>
-            </Panel>
-          )}
-          {health && <Panel title="Data freshness"><FreshnessList items={health.freshness} />{health.stale_layers.length > 0 && <div className="mt-2 text-xs text-warn">Stale layers: {health.stale_layers.join(", ")}</div>}</Panel>}
-        </div>
+    <div className="space-y-6">
+      {k && <KpiStrip k={k} />}
+
+      <Panel title="Situation summary"><SummaryText eventId={ev.id} version={version} /></Panel>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Panel title="Recommended next steps" right={<Link href={`/events/${id}/resources`} className="text-sm text-accent hover:underline">Plan resources</Link>}>
+          <RecommendedActions eventId={ev.id} version={version} />
+        </Panel>
+        <Panel title="Most urgent areas" right={<Link href={`/events/${id}/priorities`} className="text-sm text-accent hover:underline">All priorities</Link>}>
+          <TopAreas eventId={ev.id} version={version} />
+        </Panel>
       </div>
-      {version === 0 && <Empty>Results appear here after analysis.</Empty>}
+
+      <div className="space-y-3">
+        {version > 1 && <Disclosure title="What changed since the last assessment"><WhatChanged eventId={ev.id} version={version} /></Disclosure>}
+        <Disclosure title="Alerts" hint={nAlerts ? `${nAlerts}` : "none"}><AlertList eventId={ev.id} version={version} /></Disclosure>
+        <Disclosure title="Data sources and method" hint={health?.sensor_mode}>
+          <div className="space-y-5">
+            {health?.sensor_mode && (
+              <div>
+                <div className="text-sm font-medium text-strong">How the satellite data was used ({health.sensor_mode})</div>
+                <p className="mt-1 text-sm text-muted">{health.sensor_explanation}</p>
+              </div>
+            )}
+            {health && (
+              <div>
+                <div className="mb-1.5 text-sm font-medium text-strong">Data freshness</div>
+                <FreshnessList items={health.freshness} />
+              </div>
+            )}
+            <div>
+              <div className="mb-1.5 text-sm font-medium text-strong">Event details</div>
+              <dl className="grid grid-cols-[10rem_1fr] gap-y-1.5 text-sm">
+                <dt className="text-muted">Hazard</dt><dd className="capitalize">{ev.hazard}</dd>
+                <dt className="text-muted">Area</dt><dd>{ev.aoi?.area_km2} km²</dd>
+                <dt className="text-muted">Last satellite pass</dt><dd>{dt(ev.last_satellite_pass)}</dd>
+                <dt className="text-muted">Last analysis</dt><dd>{dt(ev.last_analysis)}</dd>
+                <dt className="text-muted">Assessment version</dt><dd>v{ev.assessment_version}</dd>
+              </dl>
+            </div>
+          </div>
+        </Disclosure>
+        <Disclosure title="Analysis steps" hint={running ? "running" : "complete"}><Pipeline steps={status.steps} /></Disclosure>
+      </div>
     </div>
   );
 }

@@ -3,48 +3,47 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useApi } from "@/lib/hooks";
 import { useAuth } from "@/lib/auth";
-import { HAZARD_LABEL, ago, hhmm } from "@/lib/format";
+import { HAZARD_LABEL } from "@/lib/format";
 import EventScope from "@/components/EventScope";
 import { useEvent } from "@/components/EventContext";
 import MapWorkspace from "@/components/MapWorkspace";
 import Pipeline from "@/components/Pipeline";
-import CopilotPanel from "@/components/CopilotPanel";
 import DemoRunner from "@/components/DemoRunner";
-import { AlertFeed, FreshnessList, KpiStrip, RecommendedActions } from "@/components/Insights";
-import { DemoBadge, Empty, Panel, Spinner } from "@/components/ui";
+import { AlertList, KpiStrip, RecommendedActions } from "@/components/Insights";
+import { Empty, Panel, Spinner } from "@/components/ui";
 
 function Live({ id }: { id: number }) {
   const { event: ev, status, analyse, busy } = useEvent();
   const version = ev?.assessment_version ?? 0;
   const { data: k } = useApi<any>(`/api/events/${id}/kpis`, { deps: [version] });
-  const { data: tl } = useApi<any[]>(`/api/events/${id}/timeline`, { deps: [version], poll: 6000 });
   if (!ev || !status) return <Spinner />;
+  const running = !!status.job && ["queued", "running"].includes(status.job.status);
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
       {!version && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded border border-p1/60 bg-p1/10 p-3">
-          <div><div className="text-[11px] font-bold   text-p1">{HAZARD_LABEL[ev.hazard]} alert detected</div><div className="text-sm font-bold text-strong">{ev.name}</div></div>
-          <button className="btn btn-primary" disabled={busy} onClick={() => analyse(true)}>{busy ? "Analysing…" : "Analyse event"}</button>
-        </div>
+        <Panel>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="text-sm text-muted">{HAZARD_LABEL[ev.hazard]} event</div>
+              <div className="text-lg font-semibold text-strong">{ev.name}</div>
+            </div>
+            <button className="btn btn-primary" disabled={busy} onClick={() => analyse(true)}>{busy ? "Analysing…" : "Run analysis"}</button>
+          </div>
+        </Panel>
       )}
       {k && version > 0 && <KpiStrip k={k} />}
-      <div className="grid gap-3 xl:grid-cols-[1fr_24rem]">
-        <div className="h-[34rem]">{version > 0 ? <MapWorkspace eventId={id} /> : <Empty>The live map appears once analysis completes.</Empty>}</div>
-        <div className="space-y-3">
-          <Panel title="Pipeline"><Pipeline steps={status.steps} /></Panel>
-          {version > 0 && <AlertFeed eventId={id} version={version} limit={5} />}
+      <div className="grid gap-6 xl:grid-cols-[1fr_24rem]">
+        <div className="h-[38rem]">{version > 0 ? <MapWorkspace eventId={id} /> : <Empty>The map appears once the analysis has finished.</Empty>}</div>
+        <div className="space-y-6">
+          {(running || !version) && <Panel title="Progress"><Pipeline steps={status.steps} /></Panel>}
+          {version > 0 && (
+            <>
+              <Panel title="Next steps" right={<Link href={`/events/${id}`} className="text-sm text-accent hover:underline">Overview</Link>}><RecommendedActions eventId={id} version={version} limit={3} /></Panel>
+              <Panel title="Recent alerts" right={<Link href={`/events/${id}/timeline`} className="text-sm text-accent hover:underline">Timeline</Link>}><AlertList eventId={id} version={version} limit={3} /></Panel>
+            </>
+          )}
         </div>
       </div>
-      {version > 0 && (
-        <div className="grid gap-3 lg:grid-cols-3">
-          <RecommendedActions eventId={id} version={version} limit={5} />
-          <Panel title="Incident timeline" pad={false}>
-            <ol className="max-h-72 overflow-y-auto p-3">{tl?.slice(-9).reverse().map((t) => <li key={t.id} className="flex gap-2 pb-1.5 text-xs"><span className="w-16 shrink-0 whitespace-nowrap tabular-nums text-muted">{hhmm(t.at)}</span><span className="text-text">{t.title}</span></li>)}</ol>
-          </Panel>
-          <Panel title="Ask DISHA Copilot" pad={false}><div className="h-72"><CopilotPanel eventId={id} version={version} compact /></div></Panel>
-        </div>
-      )}
-      {k && <Panel title="Data freshness"><FreshnessList items={k.data_freshness} /></Panel>}
     </div>
   );
 }
@@ -66,33 +65,31 @@ export default function CommandCenter() {
   useEffect(() => { if (id) try { window.localStorage.setItem("disha_event", String(id)); } catch {} }, [id]);
 
   return (
-    <div className="p-4">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded border border-accent/40 bg-accent/10 px-3 py-2 text-xs">
-        <span><b className="text-strong">New here?</b> Read the two-minute guide to what DISHA does and how to use it.</span>
-        <Link href="/guide" className="btn btn-primary btn-sm">Open the guide →</Link>
-      </div>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+    <div className="mx-auto max-w-7xl px-6 py-8">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-lg font-bold  text-strong">Command Centre</h1>
-          <div className="text-xs text-muted">{cc ? `${cc.totals.active_events} active event(s) · ${cc.totals.p1} P1 · ${cc.totals.p2} P2 · ${cc.totals.people_at_risk.toLocaleString()} people at risk` : "Loading…"}</div>
+          <h1 className="text-2xl font-semibold text-strong">Command Centre</h1>
+          <div className="mt-1 text-sm text-muted">
+            {cc ? `${cc.totals.active_events} active event${cc.totals.active_events === 1 ? "" : "s"}` : "Loading…"} · New to DISHA? <Link href="/guide" className="text-accent hover:underline">Read the guide</Link>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {cc?.events.length > 0 && (
             <select className="input w-72" value={id ?? ""} onChange={(e) => setId(+e.target.value)} aria-label="Active event">
-              {cc.events.map((r: any) => <option key={r.event.id} value={r.event.id}>{r.event.code} · {r.event.name}{r.event.assessment_version ? "" : " (not analysed)"}</option>)}
+              {cc.events.map((r: any) => <option key={r.event.id} value={r.event.id}>{r.event.name}{r.event.assessment_version ? "" : " (not analysed)"}</option>)}
             </select>
           )}
-          {can("event.write") && <button className="btn btn-primary" onClick={() => setDemo(true)}>▶ Run DISHA demo</button>}
-          {id && <Link className="btn" href={`/events/${id}/present`}>Presentation mode</Link>}
+          {can("event.write") && <button className="btn" onClick={() => setDemo(true)}>Run guided demo</button>}
         </div>
       </div>
       {loading && !cc ? <Spinner /> : !cc?.events.length ? (
-        <div className="panel mx-auto mt-10 max-w-xl p-8 text-center">
-          <div className="tabular-nums text-3xl font-bold  text-strong">DISHA</div>
-          <p className="mt-2 text-sm text-muted">No events yet. Start the guided demonstration to see the complete loop: detect → predict → prioritise → plan → dispatch → verify → recalculate.</p>
-          <div className="mt-4 flex justify-center gap-2">{can("event.write") && <button className="btn btn-primary" onClick={() => setDemo(true)}>▶ Run DISHA demo</button>}<Link className="btn" href="/events">Browse scenarios</Link></div>
-          <div className="mt-3"><DemoBadge /></div>
-        </div>
+        <Panel>
+          <div className="mx-auto max-w-lg py-8 text-center">
+            <div className="text-xl font-semibold text-strong">No events yet</div>
+            <p className="mt-2 text-sm text-muted">Start from a real or simulated scenario, or run the guided demo to see the whole workflow in about a minute.</p>
+            <div className="mt-5 flex justify-center gap-3">{can("event.write") && <button className="btn btn-primary" onClick={() => setDemo(true)}>Run guided demo</button>}<Link className="btn" href="/events">Browse scenarios</Link></div>
+          </div>
+        </Panel>
       ) : id ? <EventScope key={id} id={id}><Live id={id} /></EventScope> : null}
       {demo && <DemoRunner existingEventId={id} onEvent={(n) => { setId(n); reload(); }} onClose={() => { setDemo(false); reload(); }} />}
     </div>
