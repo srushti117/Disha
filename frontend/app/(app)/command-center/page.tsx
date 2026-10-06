@@ -68,8 +68,8 @@ export default function CommandCenter() {
   return (
     <div className="p-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded border border-accent/40 bg-accent/10 px-3 py-2 text-xs">
-        <span><b className="text-strong">Naye hain?</b> Pehle 2-minute guide padhein ki DISHA kya hai aur kaise use karein.</span>
-        <Link href="/guide" className="btn btn-primary btn-sm">Guide kholein →</Link>
+        <span><b className="text-strong">New here?</b> Read the two-minute guide to what DISHA does and how to use it.</span>
+        <Link href="/guide" className="btn btn-primary btn-sm">Open the guide →</Link>
       </div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
