@@ -1,0 +1,55 @@
+# DISHA 2.0 - local / single-host deployment.  `docker compose up --build`
+# UI: http://localhost:3000   API docs: http://localhost:8000/docs
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: disha
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-disha_dev_only}
+      POSTGRES_DB: disha
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U disha -d disha"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    # Reserved for the job queue / cache. The current build runs jobs in the API process (see docs/ARCHITECTURE.md).
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://disha:${POSTGRES_PASSWORD:-disha_dev_only}@db:5432/disha
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env (see .env.example)}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      SEED_DEMO_ACCOUNTS: ${SEED_DEMO_ACCOUNTS:-true}
+      DEMO_MODE: ${DEMO_MODE:-true}
+      NOTIFY_PROVIDER: ${NOTIFY_PROVIDER:-mock}
+      DATA_DIR: /data
+      MODELS_DIR: /models
+    volumes: ["disha_data:/data", "disha_models:/models"]
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    ports: ["8000:8000"]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+    depends_on: [backend]
+    ports: ["3000:3000"]
+
+volumes:
+  pgdata:
+  disha_data:
+  disha_models:
