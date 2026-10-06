@@ -14,7 +14,7 @@
     "@deck.gl/layers": "^9.0.38",
     "@deck.gl/mapbox": "^9.0.38",
     "chart.js": "^4.4.4",
-    "maplibre-gl": "^4.7.1",
+    "maplibre-gl": "^6.11.2",
     "next": "14.2.35",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",
