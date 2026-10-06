@@ -1,5 +1,7 @@
 # DISHA 2.0
 
+[![CI](https://github.com/srushti117/Disha/actions/workflows/ci.yml/badge.svg)](https://github.com/srushti117/Disha/actions/workflows/ci.yml)
+
 **Disaster Intelligence, Situational Hazard Assessment & Response Orchestration**
 *From Satellite Pixels to Life-Saving Decisions. Detect. Predict. Prioritise. Respond.*
 
