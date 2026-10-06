@@ -20,5 +20,5 @@ python-multipart>=0.0.9
 scikit-learn>=1.4
 redis>=5.0
 httpx>=0.27
-requests>=2.31
+requests>=2.34.2
 pytest>=8.0
