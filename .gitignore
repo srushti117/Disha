@@ -17,3 +17,5 @@ models/*.onnx
 models/*.json
 *.tsbuildinfo
 .pytest_cache/
+
+docs/pdf_assets/

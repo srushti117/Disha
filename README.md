@@ -80,7 +80,7 @@ Sign in as commander → **Command Centre → ▶ Run DISHA demo → Start demo*
 Run them: `cd backend && .venv/Scripts/python -m pytest tests -q` · `cd e2e && npm i && node run.mjs` (stack running).
 
 ## Documentation
-[LIVE_DATA](docs/LIVE_DATA.md) · [ARCHITECTURE](docs/ARCHITECTURE.md) · [API](docs/API.md) · [DATABASE](docs/DATABASE.md) · [ML](docs/ML.md) · [DEMO](docs/DEMO.md) · [DEPLOYMENT](docs/DEPLOYMENT.md) · [Implementation plan & status ledger](DISHA_IMPLEMENTATION_PLAN.md)
+**[Project guide (PDF, 32 pages)](docs/DISHA_Project_Guide.pdf)** · [LIVE_DATA](docs/LIVE_DATA.md) · [ARCHITECTURE](docs/ARCHITECTURE.md) · [API](docs/API.md) · [DATABASE](docs/DATABASE.md) · [ML](docs/ML.md) · [DEMO](docs/DEMO.md) · [DEPLOYMENT](docs/DEPLOYMENT.md) · [Implementation plan & status ledger](DISHA_IMPLEMENTATION_PLAN.md)
 
 ## Repository layout
 ```
